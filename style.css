@@ -1,0 +1,264 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Yanone Kaffeesatz", sans-serif;
+}
+body {
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  
+}
+h1{
+  background-color: #95e0b2;
+  padding: 10px;
+  color: rgb(63, 60, 60);
+  text-align: center;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 500px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+  position: relative;
+}
+.post {
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  gap: 20px;
+}
+.textInput {
+  padding: 10px;
+  border-radius: 10px;
+  outline: none;
+  background: rgb(255, 255, 255, 0.5);
+  border: none;
+}
+.textInput:focus{
+  outline: none;
+}
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  gap: 10px;
+
+}
+
+.headline {
+  text-align: center;
+  color: rgb(68, 63, 63);
+  padding: 10px;
+  background-color: rgb(255, 255, 0, 0.6);
+}
+.submit-btn {
+  width: 200px;
+  padding: 10px 0;
+  background-color: #307048;
+  font-size: 1.2rem;
+  color: white;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+.bloggimg {
+  max-width: 100%;
+  object-fit: cover;
+  width: 500px;
+}
+.blogg-container {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  gap: 30px;
+  
+}
+.bloggheadline {
+  padding: 10px 0;
+  text-align: center;
+  background: linear-gradient(90deg, rgb(221, 221, 221) 0%, rgba(255,110,110,0) 50%, rgba(255,255,255,0) 100%);;
+}
+.blog-post {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+ 
+}
+.headline{
+    font-size: 2.4rem;
+    color: black;
+}
+.blogg-text{
+    line-height: 20pt;
+    font-size: 1.2rem;
+}
+.user-interface{
+  font-size: 1.4rem;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  color: rgb(36, 36, 36);
+}
+.button-box{
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+}
+.edit{
+  position: fixed;
+  z-index: 1;
+  width: 50%;
+  border-radius: 20px;
+  padding: 40px 20px;
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  box-shadow: 0px 0px 17px 3px rgba(196,46,255,0.9);
+  opacity: 0;
+  
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: 0.4s ease-in-out ;
+}
+.edit.active{
+  opacity: 1;
+}
+.x-button{
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  border: none;
+  background: rgb(250, 55, 55,0.8);
+  color: white;
+  height: 30px;
+  width: 30px;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.white{
+  color: rgb(251, 255, 43);
+}
+.red {
+  color: rgb(250, 71, 71);
+  
+}
+.comment{
+  padding: 10px;
+  border-radius: 10px;
+  background: rgb(255, 255, 255, 0.5);
+  min-height: 80px;
+}
+.comment:focus{
+  outline: none;
+}
+.comments{
+  padding: 10px;
+  background: rgb(255, 255, 255, 0.5);
+  border-radius: 5px;
+}
+.sign-in{
+  display: flex;
+  flex-direction: column;
+}
+.sign-form{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+.login{
+  position: fixed;
+ z-index: -1;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  display: none;
+  transition: 0.4s ease;
+}
+.login.active{
+  display: block;
+}
+.login-input{
+  padding: 5px;
+  outline: none;
+  border: .5px solid black;
+ 
+}
+.user-button{
+  padding: 10px 30px;
+  border-radius: 50px;
+  outline: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.login-container{
+  display: flex;
+  width: 90%;
+  margin-inline: auto;
+  justify-content: end;
+  gap: 20px;
+  padding-top: 20px;
+
+}
+.sign{
+  border: 1px solid white;
+  background: none;
+  color: white;
+}
+.register{
+  background: rgb(255, 173, 20);
+  color: white;
+  border: none;
+}
+.signin-container{
+  top: 100px;
+  right: 100px;
+  z-index: 1;
+}
+.register-container{
+  right: 10%;
+  padding: 20px 50px;
+  top: 200px;
+  z-index: 1;
+}
+.login-headline{
+padding: 10px;
+text-align: center;
+background: linear-gradient(to right, #524a8c 1%, #ff6857 99%); 
+ background-clip: text; 
+ -webkit-text-fill-color: transparent;
+ font-weight: bold;
+ font-size: 2rem;
+}
+.close-app{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 25px;
+  width: 25px;
+  border-radius: 50px;
+  background: rgb(255, 0, 0, 0.7);
+  font-size: 0.9rem;
+  display: grid;
+  place-items: center;
+}

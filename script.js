@@ -1,5 +1,5 @@
-const BASE_URL = "https://crudcrud.com/api/6e14e7a14bba4a16b01f084df3add5e6/posts";
-const USERBASE_URL = "https://crudcrud.com/api/6e14e7a14bba4a16b01f084df3add5e6/users";
+const BASE_URL = "https://crudcrud.com/api/9450d3331bab4ce6a850aa9a861c72d5/posts";
+const USERBASE_URL = "https://crudcrud.com/api/9450d3331bab4ce6a850aa9a861c72d5/users";
 
 window.onload = () => {
   if (loggedIn()) {

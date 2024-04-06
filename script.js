@@ -1,5 +1,5 @@
-const BASE_URL = "https://crudcrud.com/api/9450d3331bab4ce6a850aa9a861c72d5/posts";
-const USERBASE_URL = "https://crudcrud.com/api/9450d3331bab4ce6a850aa9a861c72d5/users";
+const BASE_URL = "https://crudcrud.com/api/e6c34e8c3aeb4901b394f74c8e3804b1/posts";
+const USERBASE_URL = "https://crudcrud.com/api/e6c34e8c3aeb4901b394f74c8e3804b1/users";
 
 window.onload = () => {
   if (loggedIn()) {
@@ -11,6 +11,18 @@ window.onload = () => {
   }
 };
 const userOutput = document.querySelector("#userOutput");
+const getTime= ()=>{
+  const today= new Date();
+  const hours= today.getHours();
+  let minutes=today.getMinutes();
+  if(minutes<10){
+  minutes+= 0+minutes
+  }
+  const year= today.getFullYear();
+  const month= today.getMonth()+1;
+  const day= today.getDay();
+  return `${year}/${month}/${day} ${hours}:${minutes}`
+}
 const getLoggedInUser= ()=>{
   return JSON.parse(sessionStorage.getItem("loggedInUser"));
  }
@@ -105,7 +117,7 @@ const checkLogin = async (username, password) => {
     if (!res.ok) {
       throw new Error("Något är fel på serversidan");
     }
-    const data = await res.json();
+    const data = await res.json(); 
     console.log(data);
     for (const user of data) {
       if (user.username === username && user.password === password) {
@@ -134,7 +146,7 @@ const loginUser = async () => {
      const user= {user:userName,
       token: userID}
       sessionStorage.setItem("loggedInUser", JSON.stringify(user));
-      console.log("Du lyckades");
+      
       userLoggedIn()
     } else {
       let errorLogin = document.querySelector("#errorLogin");
@@ -183,7 +195,6 @@ const userLoggedOut = () => {
   signInButton.classList.add("sign");
   signInButton.innerHTML=`<i class="fa-solid fa-lock"></i> Logga in`
   signInButton.addEventListener("click", ()=>{
-    console.log(signInButton)
     document.querySelector("#signInForm").classList.add("active")
   })
   const registerButton= document.createElement("button");
@@ -225,10 +236,11 @@ const postInformation = async () => {
         userID: getLoggedInUser().token,
         user: getLoggedInUser().user
       },
+      date: getTime(),
       headline: titleInput,
       image: imgUrl,
       text: textInput,
-      likes: 0,
+      likes: [],
       comments: [],
 
     };
@@ -241,8 +253,8 @@ const postInformation = async () => {
     });
     const newPostData= await res.json();
     const postID= newPostData._id;
-    console.log(postID)
-    await addPostToUser(postID,titleInput);
+    const title= newPostData.headline;
+    await addPostToUser(postID,title);
     await fetchPost();
     document.querySelector("#titleInput").value = "";
     document.querySelector("#imgUrl").value = "";
@@ -257,7 +269,7 @@ const addPostToUser = async(id, title)=>{
   let user;
   const loggedInUser= getLoggedInUser()
   try{ 
-    console.log(loggedInUser.token)
+    
     const response= await fetch(`${USERBASE_URL}/${loggedInUser.token}`);
     const userData= await response.json();
     const postInformation= {
@@ -272,11 +284,21 @@ const addPostToUser = async(id, title)=>{
   }
 
   try{
-    console.log(user)
+    const updatedInformation={
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        username: user.username,
+        password: user.password,
+        myPosts: user.myPosts,
+        likedPost:user.likedPost,
+        comments:user.comments
+      };
+ 
     const putRespone= await fetch(`${USERBASE_URL}/${loggedInUser.token}`,{
       method:"PUT",
       headers:{"Content-type": "application/json"},
-      body:JSON.stringify(user)
+      body:JSON.stringify(updatedInformation)
     })
     if(!putRespone.ok){
       throw new Error("Något blev fel med att lägga upp på servern", putRespone)
@@ -296,7 +318,7 @@ const fetchPost = async () => {
     }
     const posts = await res.json();
     posts.forEach((post) => {
-      showPost(post);
+    showPost(post);
     });
   } catch (error) {
     console.error("Något blev fel med konverteringen av informationen", error);
@@ -305,7 +327,7 @@ const fetchPost = async () => {
 
 const editBox = document.querySelector("#editBox");
 
-const showPost = (post) => {
+const showPost = async(post) => {
   let blogContainer = document.createElement("div");
   let headline = document.createElement("h2");
   let image = document.createElement("img");
@@ -406,7 +428,7 @@ const showPost = (post) => {
   userOutput.appendChild(blogContainer);
 };
 
-const likePost = async (post) => {
+/* const likePost = async (post) => {
   console.log(post);
   const updatePost = {
     headline: post.headline,
@@ -426,7 +448,90 @@ const likePost = async (post) => {
   } catch (error) {
     console.error("Något blev fel med gillningen", error);
   }
+}; */
+const likePost = async (post) => {
+  console.log(post);
+  const updatePost = {
+    createdBy:{
+      userID: post.createdBy.userID,
+      user: post.createdBy.user
+    },
+    headline: post.headline,
+    image: post.image,
+    text: post.text,
+    likes: post.likes,
+    comments: post.comments,
+  };
+  updatePost.likes.push(getLoggedInUser().user)
+  try {
+    const res = await fetch(`${BASE_URL}/${post._id}`, {
+      method: "PUT",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify(updatePost),
+    });
+    await addLikeToUser(post)
+    await fetchPost();
+  } catch (error) {
+    console.error("Något blev fel med gillningen", error);
+  }
 };
+const addLikeToUser= async(post)=>{
+  let user;
+  try{
+  const response= await fetch(`${USERBASE_URL}/${getLoggedInUser().token}`)
+  const data = await response.json();
+  const like= {
+    postID: post._id,
+    title: post.headline
+  }
+  user=data;
+  user.likedPost.push(like)
+
+  }
+  catch(error){
+    console.error("Något blev fel att hæmta anvændaren")
+  }
+
+  try{
+    const updatedInformation={
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      username: user.username,
+      password: user.password,
+      myPosts: user.myPosts,
+      likedPost:user.likedPost,
+      comments:user.comments
+    };
+  
+  const res = await fetch(`${USERBASE_URL}/${getLoggedInUser().token}`,{
+    method: "PUT",
+    headers: {"Content-type":"application/json"},
+    body: JSON.stringify(updatedInformation)
+  })
+  }
+  catch(error){
+    console.error("Något blev fel med att lægga till liken", error)
+  }
+}
+const checkIfLiked= async(post)=>{
+  try{
+    const res =await fetch(`${USERBASE_URL}/${getLoggedInUser().token}`)
+    const data = await res.json();
+    for (const user of data) {
+      if (user.likedPost.postID === post._id) {
+        return true;
+      }
+    }
+   return false;
+  }
+  catch(error){
+    console.error("Något blev fel med kontrolleringen om inlegget var gillat eller ej")
+  }
+}
+const removeLike= async(post)=>{
+  
+}
 
 const commentPost = async (comment, post) => {
   let userInput = comment.value;

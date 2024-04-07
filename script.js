@@ -359,18 +359,33 @@ informationBox.appendChild(timeStamp)
   let deleteButton = document.createElement("button");
   let editButton = document.createElement("button");
   let likeButton = document.createElement("button");
-  
+  let likeContainer = document.createElement("div");
+  let likeCounter = document.createElement("p");
   try{
   let isLiked= await checkIfLiked(post)
   console.log(isLiked)
   if(isLiked){
-    likeButton.innerHTML = `<i class="fa-solid fa-heart"></i>`;
+    likeButton.innerHTML = ` <i class="fa-solid fa-heart"></i>`;
+    if(post.likes.length===1){
+      likeCounter.innerHTML = `Du gillar detta`
+    }
+    else {
+      likeCounter.innerHTML = `Du och ${post.likes.length-1} andra gillar detta `;
+    }
     likeButton.addEventListener('click', async()=>{
     await removeLike(post)
     })
   }
   else {
-    likeButton.innerHTML = `<i class="fa-regular fa-heart"></i>`;
+    if (post.likes.length===0) {
+      likeCounter.innerHTML = `Inga likes`;
+    } else if(post.likes.length===1){
+      likeCounter.innerHTML = `${post.likes[0]} gillar detta`
+    }
+    else {
+      likeCounter.innerHTML = `${post.likes[0]} och ${post.likes.length-1} till gillar detta `;
+    }
+    likeButton.innerHTML = ` <i class="fa-regular fa-heart"></i>`;
     likeButton.addEventListener("click", async () => {
       await likePost(post);
     });
@@ -379,8 +394,6 @@ informationBox.appendChild(timeStamp)
   catch(error){
     console.error("Något blev fel med att se om inlägget var gillat eller ej", error)
   }
-
-    
   likeButton.classList.add("user-interface");
   
   likeButton.classList.add("red");
@@ -390,16 +403,8 @@ informationBox.appendChild(timeStamp)
   editButton.innerHTML = `<i class="fa-solid fa-pen white"></i>`;
   editButton.classList.add("user-interface");
   editButton.classList.add("white");
-  let likeContainer = document.createElement("div");
-  let likeCounter = document.createElement("p");
-  if (post.likes.length===0) {
-    likeCounter.innerHTML = `Inga likes`;
-  } else if(post.likes.length===1){
-    likeCounter.innerHTML = `${post.likes[0]} gillar detta`
-  }
-  else {
-    likeCounter.innerHTML = `${post.likes[0]} och ${post.likes.length-1} till gillar detta `;
-  }
+ 
+  
   likeCounter.style.fontStyle = "italic";
   likeContainer.style.display = "flex";
   likeContainer.style.alignItems = "center";

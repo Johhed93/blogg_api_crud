@@ -1,5 +1,5 @@
-const BASE_URL = "https://crudcrud.com/api/e6c34e8c3aeb4901b394f74c8e3804b1/posts";
-const USERBASE_URL = "https://crudcrud.com/api/e6c34e8c3aeb4901b394f74c8e3804b1/users";
+const BASE_URL = "https://crudcrud.com/api/7d02cf5c2e9b4472853067b5b9e03d40/posts";
+const USERBASE_URL = "https://crudcrud.com/api/7d02cf5c2e9b4472853067b5b9e03d40/users";
 
 window.onload = () => {
   if (loggedIn()) {
@@ -67,7 +67,7 @@ const registerUser = async () => {
   } else if (await ifUserExist(registerUsername)) {
     userExistMsg.innerHTML = "Användarnamnet är upptaget";
   } else {
-    const user = {
+    const user =[{
       firstname: firstName,
       lastname: lastName,
       email: userEmail,
@@ -76,7 +76,8 @@ const registerUser = async () => {
       myPosts: [],
       likedPost:[],
       comments:[]
-    };
+    
+    }];
     try {
       const res = await fetch(USERBASE_URL, {
         method: "POST",
@@ -330,7 +331,7 @@ const editBox = document.querySelector("#editBox");
 const showPost = async(post) => {
   let blogContainer = document.createElement("div");
   let headline = document.createElement("h2");
-  let image = document.createElement("img");
+  
   let blogpost = document.createElement("p");
 
   blogContainer.classList.add("blog-post");
@@ -338,6 +339,19 @@ const showPost = async(post) => {
   headline.classList.add("bloggheadline");
   headline.innerHTML = post.headline;
 
+let informationBox= document.createElement("div");
+let timeStamp= document.createElement("p");
+informationBox.style.fontStyle="italic";
+informationBox.style.fontSize="0.9rem";
+informationBox.style.display="flex"
+informationBox.style.gap="10px"
+timeStamp.innerHTML=post.date;
+let creator= document.createElement("p");
+creator.innerHTML=`Created by ${post.createdBy.user}`;
+informationBox.appendChild(creator);
+informationBox.appendChild(timeStamp)
+
+  let image = document.createElement("img");
   image.classList.add("bloggimg");
   image.src = post.image;
 
@@ -345,9 +359,30 @@ const showPost = async(post) => {
   let deleteButton = document.createElement("button");
   let editButton = document.createElement("button");
   let likeButton = document.createElement("button");
+  
+  try{
+  let isLiked= await checkIfLiked(post)
+  console.log(isLiked)
+  if(isLiked){
+    likeButton.innerHTML = `<i class="fa-solid fa-heart"></i>`;
+    likeButton.addEventListener('click', async()=>{
+    await removeLike(post)
+    })
+  }
+  else {
+    likeButton.innerHTML = `<i class="fa-regular fa-heart"></i>`;
+    likeButton.addEventListener("click", async () => {
+      await likePost(post);
+    });
+  }
+  }
+  catch(error){
+    console.error("Något blev fel med att se om inlägget var gillat eller ej", error)
+  }
 
+    
   likeButton.classList.add("user-interface");
-  likeButton.innerHTML = `<i class="fa-regular fa-heart"></i>`;
+  
   likeButton.classList.add("red");
 
   deleteButton.classList.add("user-interface");
@@ -357,10 +392,13 @@ const showPost = async(post) => {
   editButton.classList.add("white");
   let likeContainer = document.createElement("div");
   let likeCounter = document.createElement("p");
-  if (!post.likes) {
+  if (post.likes.length===0) {
     likeCounter.innerHTML = `Inga likes`;
-  } else {
-    likeCounter.innerHTML = `${post.likes} personer gillar detta`;
+  } else if(post.likes.length===1){
+    likeCounter.innerHTML = `${post.likes[0]} gillar detta`
+  }
+  else {
+    likeCounter.innerHTML = `${post.likes[0]} och ${post.likes.length-1} till gillar detta `;
   }
   likeCounter.style.fontStyle = "italic";
   likeContainer.style.display = "flex";
@@ -382,9 +420,7 @@ const showPost = async(post) => {
     commentArea.value = "";
   });
 
-  likeButton.addEventListener("click", async () => {
-    await likePost(post);
-  });
+
   editButton.addEventListener("click", async () => {
     await editPost(post);
   });
@@ -417,6 +453,7 @@ const showPost = async(post) => {
   blogpost.innerHTML = post.text;
 
   blogContainer.appendChild(headline);
+  blogContainer.appendChild(informationBox)
   blogContainer.appendChild(image);
   blogContainer.appendChild(blogpost);
   blogContainer.appendChild(likeContainer);
@@ -428,27 +465,6 @@ const showPost = async(post) => {
   userOutput.appendChild(blogContainer);
 };
 
-/* const likePost = async (post) => {
-  console.log(post);
-  const updatePost = {
-    headline: post.headline,
-    image: post.image,
-    text: post.text,
-    likes: post.likes + 1,
-    comments: post.comments,
-  };
-  try {
-    const res = await fetch(`${BASE_URL}/${post._id}`, {
-      method: "PUT",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(updatePost),
-    });
-    console.log(res)
-    await fetchPost();
-  } catch (error) {
-    console.error("Något blev fel med gillningen", error);
-  }
-}; */
 const likePost = async (post) => {
   console.log(post);
   const updatePost = {
@@ -456,6 +472,7 @@ const likePost = async (post) => {
       userID: post.createdBy.userID,
       user: post.createdBy.user
     },
+    date: post.date,
     headline: post.headline,
     image: post.image,
     text: post.text,
@@ -480,12 +497,9 @@ const addLikeToUser= async(post)=>{
   try{
   const response= await fetch(`${USERBASE_URL}/${getLoggedInUser().token}`)
   const data = await response.json();
-  const like= {
-    postID: post._id,
-    title: post.headline
-  }
+ 
   user=data;
-  user.likedPost.push(like)
+  user.likedPost.push(post._id)
 
   }
   catch(error){
@@ -515,22 +529,25 @@ const addLikeToUser= async(post)=>{
   }
 }
 const checkIfLiked= async(post)=>{
+  let user;
   try{
     const res =await fetch(`${USERBASE_URL}/${getLoggedInUser().token}`)
     const data = await res.json();
-    for (const user of data) {
-      if (user.likedPost.postID === post._id) {
-        return true;
-      }
-    }
-   return false;
+    user=data
+    console.log(user, "Hejhej")
+    const likedPostExist = user.likedPost.some((person) => {
+       
+      return person.includes(post._id);
+    });
+    return likedPostExist
+    
   }
   catch(error){
     console.error("Något blev fel med kontrolleringen om inlegget var gillat eller ej")
   }
 }
 const removeLike= async(post)=>{
-  
+
 }
 
 const commentPost = async (comment, post) => {
@@ -598,4 +615,4 @@ const editPost = async (post) => {
   }
 };
 const signInForm = document.querySelector("#signInForm");
-/* fetchPost(); */
+fetchPost();

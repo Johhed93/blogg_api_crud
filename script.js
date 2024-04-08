@@ -1,5 +1,5 @@
-const BASE_URL = "https://crudcrud.com/api/7d02cf5c2e9b4472853067b5b9e03d40/posts";
-const USERBASE_URL = "https://crudcrud.com/api/7d02cf5c2e9b4472853067b5b9e03d40/users";
+const BASE_URL = "https://crudcrud.com/api/ad8dc85f250a4c288da1cd784c3fa2fc/posts";
+const USERBASE_URL = "https://crudcrud.com/api/ad8dc85f250a4c288da1cd784c3fa2fc/users";
 
 window.onload = () => {
   if (loggedIn()) {
@@ -67,7 +67,7 @@ const registerUser = async () => {
   } else if (await ifUserExist(registerUsername)) {
     userExistMsg.innerHTML = "Användarnamnet är upptaget";
   } else {
-    const user =[{
+    const user ={
       firstname: firstName,
       lastname: lastName,
       email: userEmail,
@@ -77,7 +77,8 @@ const registerUser = async () => {
       likedPost:[],
       comments:[]
     
-    }];
+    };
+    
     try {
       const res = await fetch(USERBASE_URL, {
         method: "POST",
@@ -254,8 +255,8 @@ const postInformation = async () => {
     });
     const newPostData= await res.json();
     const postID= newPostData._id;
-    const title= newPostData.headline;
-    await addPostToUser(postID,title);
+    
+    await addPostToUser(postID);
     await fetchPost();
     document.querySelector("#titleInput").value = "";
     document.querySelector("#imgUrl").value = "";
@@ -266,18 +267,15 @@ const postInformation = async () => {
   }
 };
 
-const addPostToUser = async(id, title)=>{
+const addPostToUser = async(id)=>{
   let user;
   const loggedInUser= getLoggedInUser()
   try{ 
     
     const response= await fetch(`${USERBASE_URL}/${loggedInUser.token}`);
     const userData= await response.json();
-    const postInformation= {
-      postID: id,
-      postTitle: title
-    }
-    userData.myPosts.push(postInformation)
+   
+    userData.myPosts.push(id)
    user=userData
   }
   catch(error){
@@ -356,8 +354,7 @@ informationBox.appendChild(timeStamp)
   image.src = post.image;
 
   let buttonContainer = document.createElement("div");
-  let deleteButton = document.createElement("button");
-  let editButton = document.createElement("button");
+ 
   let likeButton = document.createElement("button");
   let likeContainer = document.createElement("div");
   let likeCounter = document.createElement("p");
@@ -397,18 +394,34 @@ informationBox.appendChild(timeStamp)
   likeButton.classList.add("user-interface");
   
   likeButton.classList.add("red");
-
-  deleteButton.classList.add("user-interface");
-  deleteButton.innerHTML = `<i class="fa-solid fa-trash-can "></i>`;
-  editButton.innerHTML = `<i class="fa-solid fa-pen white"></i>`;
-  editButton.classList.add("user-interface");
-  editButton.classList.add("white");
- 
-  
   likeCounter.style.fontStyle = "italic";
   likeContainer.style.display = "flex";
   likeContainer.style.alignItems = "center";
   likeContainer.style.gap = "5px";
+
+  
+  const checkIfMyPost= await checkIfUsersPost(post)
+  if(checkIfMyPost){
+    let deleteButton = document.createElement("button");
+    let editButton = document.createElement("button");
+    deleteButton.classList.add("user-interface");
+    deleteButton.innerHTML = `<i class="fa-solid fa-trash-can "></i>`;
+    editButton.innerHTML = `<i class="fa-solid fa-pen white"></i>`;
+    editButton.classList.add("user-interface");
+    editButton.classList.add("white");
+    editButton.addEventListener("click", async () => {
+      await editPost(post);
+    });
+    deleteButton.addEventListener("click", async () => {
+      await deletePost(post);
+    });
+    buttonContainer.appendChild(editButton);
+    buttonContainer.appendChild(deleteButton);
+  }
+  
+ 
+  
+ 
 
   let commentButton = document.createElement("button");
   commentButton.classList.add("submit-btn");
@@ -426,12 +439,7 @@ informationBox.appendChild(timeStamp)
   });
 
 
-  editButton.addEventListener("click", async () => {
-    await editPost(post);
-  });
-  deleteButton.addEventListener("click", async () => {
-    await deletePost(post);
-  });
+ 
 
   let commentList = document.createElement("ul");
   commentList.style.listStyleType = "none";
@@ -451,8 +459,7 @@ informationBox.appendChild(timeStamp)
 
   buttonContainer.classList.add("button-box");
 
-  buttonContainer.appendChild(editButton);
-  buttonContainer.appendChild(deleteButton);
+
 
   blogpost.classList.add("blogg-text");
   blogpost.innerHTML = post.text;
@@ -533,6 +540,20 @@ const addLikeToUser= async(post)=>{
     console.error("Något blev fel med att lægga till liken", error)
   }
 }
+const checkIfUsersPost= async(post)=>{
+  try{
+    const res =await fetch(`${USERBASE_URL}/${getLoggedInUser().token}`)
+    const data = await res.json();
+    const likedPostExist = data.myPosts.some((person) => { 
+      return person.includes(post._id);
+    });
+    return likedPostExist
+    
+}
+catch(error){
+  console.error("Något blev fel med att kontrollera om det var anvændarens inlægg")
+}
+}
 const checkIfLiked= async(post)=>{
   let user;
   try{
@@ -554,6 +575,7 @@ const checkIfLiked= async(post)=>{
 const removeLike= async(post)=>{
 
 }
+
 
 const commentPost = async (comment, post) => {
   let userInput = comment.value;
